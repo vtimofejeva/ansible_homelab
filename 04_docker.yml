@@ -1,0 +1,78 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Install pre-req packages
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: ensure apt keyrings directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Download Docker GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Get Debian architecture
+      ansible.builtin.command:
+        cmd: dpkg --print-architecture
+      register: deb_arch
+      changed_when: false
+
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch={{ deb_arch.stdout }}
+          signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/debian
+          {{ ansible_distribution_release }}
+          stable
+        filename: docker
+        state: present
+
+    - name: update the repo
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install docker and its apps
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: ensure docker is enabled and running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: add my user to the docker group
+      ansible.builtin.user:
+        name: __username__
+        groups: docker
+        append: true
+
+    - name: Create shared Docker network
+      community.docker.docker_network:
+        name: homenet
+        driver: bridge
