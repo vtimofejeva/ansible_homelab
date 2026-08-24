@@ -1,0 +1,31 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+    - name: install storage utilities
+      ansible.builtin.apt:
+        name:
+          - e2fsprogs
+          - smartmontools
+        state: present
+
+    - name: create a data mount point "external drive"
+      ansible.builtin.file:
+        path: /media/external_drive
+        state: directory
+        mode: "0755"
+
+    - name: get UUID for the new drive /dev/sda
+      ansible.builtin.command: blkid -s UUID -o value /dev/sda1
+      register: disk_uuid
+      changed_when: false
+
+    - name: mount the external drive to the above created dir
+      ansible.posix.mount:
+        path: /media/external_drive
+        src: "UUID={{ disk_uuid.stdout }}"
+        fstype: ext4
+        opts: defaults,nofail,x-systemd.device-timeout=30
+        state: mounted
