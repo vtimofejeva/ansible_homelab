@@ -46,37 +46,32 @@ Whilst OS and Docker Engine are stored on the MicroSD, data and Docker volumes a
 --> Setup finalization - set static DNS (since Pihole container is up), copy SSH Github keys and set correct permissions, setup Github config, reboot the server
 
 # Ansible Files Structure
-Directory: homelab/ansible/
-                            00_master.yml
-                            01_bootstrap.yml
-                            02_mount.yml
-                            03_fail2ban.yml
-                            04_docker.yml
-                            05_containers.yml
-                            06_backups.yml
-                            07_finaltouch.yml
-                            ansible.cfg
-                            inventory
-                            templates/
-                                      hosts.j2
-                                      jail.local.j2
+Main Directory: homelab/ansible/
+- 00_master.yml
+- 01_bootstrap.yml
+- 02_mount.yml
+- 03_fail2ban.yml
+- 04_docker.yml
+- 05_containers.yml
+- 06_backups.yml
+- 07_finaltouch.yml
+- ansible.cfg
+- inventory
+- templates --> hosts.j2 & jail.local.j2
 
 # External Storage Structure (HDD and SSD)
- /media/external_drive
-│
-├── storage
-│   ├── documents
-│   │   ├── vtimofejeva
-│   │   └── cdoyle
-│   └── photos
-│
-└── homelab
-    ├── ansible
-    ├── ssh_keys
-    ├── configs
-    ├── selfsigned_certs
-    └── docker
-        ├── containers
+Main directory: /media/external_drive/
+
+storage/
+- documents/
+- photos/
+
+homelab/
+- ansible/
+- ssh_keys/
+- configs/
+- selfsigned_certs/
+- docker/containers/
 
 # Steps Required Before Running Ansible Playbook
 1. On Router / Gateway disable the DNS Forwarding - set back to Automatic
