@@ -1,0 +1,4 @@
+[defaults]
+inventory = inventory
+private_key_file = ~/.ssh/__keyfile__
+interpreter_python = /usr/bin/python3
