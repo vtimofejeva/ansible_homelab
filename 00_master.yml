@@ -1,0 +1,23 @@
+---
+# Complete Raspberry Pi disaster-recovery provisioning
+
+# 1. Basic OS configuration - apt, hostname, hosts, locale, timeone, s/w, journald, humblepi, SSH, IP, UFW
+- import_playbook: 01_bootstrap.yml
+
+# 2. Mount external storage - create mountpoint and /etc/fstab entry
+- import_playbook: 02_mount.yml
+
+# 3. Configure Fail2ban - install and restore the original config jail.local
+- import_playbook: 03_fail2ban.yml
+
+# 4. Install Docker Engine and add humblepi to the docker group + create homenet shared network
+- import_playbook: 04_docker.yml
+
+# 5. Restore and start containers from the HDD
+- import_playbook: 05_containers.yml
+
+# 6. Configure backups - ensure homelab and vtimofejeva docs are backed up on MicroSD + get all scripts and automation copied
+- import_playbook: 06_backups.yml
+
+# 7. Final network config for static DNS, SSH and Git configuration + reboot
+- import_playbook: 07_finaltouch.yml
