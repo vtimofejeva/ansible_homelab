@@ -1,0 +1,80 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Change IP to Static on wifi interface wlan0
+      community.general.nmcli:
+        conn_name: "__wifiname__"
+        ifname: wlan0
+        type: wifi
+        ssid: "__wifiname__"
+        wifi_sec:
+          key-mgmt: wpa-psk
+          psk: "__password__"
+        method4: manual
+        ip4: __x.x.x.x__
+        gw4: __x.x.x.x__
+        dns4: __x.x.x.x__
+        dns4_ignore_auto: true
+        state: present
+        autoconnect: true
+
+    - name: Copy Github ssh keys from HDD
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/homelab/ssh_keys/piserver_home_ssh/ /home/__username__/.ssh/
+
+    - name: Set correct permission on the SSH files - __username__ and RW
+      ansible.builtin.file:
+        path: "/home/__username__/.ssh/{{ item }}"
+        owner: __username__
+        group: __username__
+        mode: '0600'
+      loop:
+       - authorized_keys
+       - github_ed25519
+       - known_hosts
+       - known_hosts.old
+
+    - name: Set correct permission on the SSH directory itself
+      ansible.builtin.file:
+        path: "/home/__username__/.ssh"
+        owner: __username__
+        group: __username__
+        mode: '0700'
+
+    - name: Set correct permission on the SSH files - __username__ and  RW-R-R
+      ansible.builtin.file:
+        path: "/home/__username__/.ssh/github_ed25519.pub"
+        owner: __username__
+        group: __username__
+        mode: '0644'
+
+    - name: Set global username config for Git
+      community.general.git_config:
+        name: user.name
+        value: __usergitname__
+        scope: global
+      become_user: __username__
+
+    - name: Set global user email config for Git
+      community.general.git_config:
+        name: user.email
+        value: __usergitemail__
+        scope: global
+      become_user: __username__
+
+    - name: Set global config for Git branches going forward to be "main"
+      community.general.git_config:
+        name: init.defaultBranch
+        value: main
+        scope: global
+      become_user: __username__
+
+    - name: Reboot the server
+      ansible.builtin.reboot:
+        reboot_timeout: 300
+        connect_timeout: 10
+        post_reboot_delay: 10
+        msg: "Reboot the Server"
