@@ -1,0 +1,56 @@
+---
+
+- hosts: all
+  become: true
+
+  vars:
+    compose_projects:
+      - portainer
+      - filebrowser
+      - joplin
+      - pihole
+      - nginxproxy
+      - heimdall
+      - kuma
+
+  tasks:
+
+    - name: Start Docker Compose applications
+      community.docker.docker_compose_v2:
+        project_src: "/media/external_drive/homelab/docker/containers/{{ item }}"
+        state: present
+      loop: "{{ compose_projects }}"
+
+    - name: Wait for all Docker containers to be running
+      community.docker.docker_host_info:
+        containers: true
+        containers_all: true
+      register: docker_info
+      until:
+        - docker_info.containers | length > 0
+        - >
+          (
+            docker_info.containers
+            | rejectattr('Status', 'match', '^Up ')
+            | list
+            | length
+          ) == 0
+      retries: 30
+      delay: 5
+
+    - name: Display final container status
+      ansible.builtin.debug:
+        msg: "{{ item.Names[0] }} - {{ item.Status }}"
+      loop: "{{ docker_info.containers }}"
+
+    - name: Verify all containers are running
+      ansible.builtin.assert:
+        that:
+          - item.Status is match('^Up ')
+        fail_msg: >-
+          Container {{ item.Names[0] }} is NOT running
+          (status: {{ item.Status }})
+        success_msg: >-
+          Container {{ item.Names[0] }} is running
+          (status: {{ item.Status }})
+      loop: "{{ docker_info.containers }}"
