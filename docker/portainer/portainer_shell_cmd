@@ -1,0 +1,11 @@
+#!/bin/bash
+#commands to install the portainer container instead of docker compose file
+
+#create volume for portainer's DB
+mkdir -p /media/docker_data/containers/portainer/
+docker volume create /media/docker_data/containers/portainer/portainer_data
+
+#run the container (alternative would be to run a compose file)
+docker run -d -p xxxx:xx -p xxxx:xx --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:sts
+
+#use browser to access the https://localhost:9443
