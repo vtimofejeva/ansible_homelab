@@ -1,0 +1,16 @@
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    networks:
+      - homenet
+    container_name: uptime-kuma
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - xxxx:xx
+    restart: unless-stopped
+
+networks:
+  homenet:
+    external: true
