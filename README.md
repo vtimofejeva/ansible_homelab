@@ -1,5 +1,6 @@
-# ansible_homelab
-Public Ansible playbooks repo for my homelab. 
+# DR - Ansible - Homelab
+Public Ansible playbooks repo for my homelab. Sensitive details removed from the playbooks.
+
 Homelab is currently small - running one Raspberry Pi 400 as a server, plus External HDD as main storage, MicroSD as OS storage, SSD as offline backup storage.
 Until further improvements added to the homelab, Ansible playbooks focus on Disaster Recovery for my Pi Server. 
 
@@ -44,3 +45,46 @@ Whilst OS and Docker Engine are stored on the MicroSD, data and Docker volumes a
 07_finaltouch.yml
 --> Setup finalization - set static DNS (since Pihole container is up), copy SSH Github keys and set correct permissions, setup Github config, reboot the server
 
+# Ansible Files Structure
+Directory: homelab/ansible/
+                            00_master.yml
+                            01_bootstrap.yml
+                            02_mount.yml
+                            03_fail2ban.yml
+                            04_docker.yml
+                            05_containers.yml
+                            06_backups.yml
+                            07_finaltouch.yml
+                            ansible.cfg
+                            inventory
+                            templates/
+                                      hosts.j2
+                                      jail.local.j2
+
+# External Storage Structure (HDD and SSD)
+ /media/external_drive/
+                       storage/
+                              documents/
+                                        vtimofejeva/
+                                        cdoyle/
+                              photos/
+                        homelab/
+                              ansible/
+                              ssh_keys/
+                              configs/
+                              selfsigned_certs/
+                              docker/
+                                        containers/
+
+# Steps Required Before Running Ansible Playbook
+1. On Router / Gateway disable the DNS Forwarding - set back to Automatic
+2. On PC (Fedora) enable the DHCP and remove static DNS server
+3. Using Pi Imager prepare the MicroSD and install the OS
+4. Setup a new user if prompted on the Pi Server
+5. Ensure OpenSSH is Running on the Pi Server
+6. On main PC (Fedora) - delete the old Host Keys (ssh-keygen -R x.x.x.x)
+7. Verify PC and Ansible reaches the Pi (ansible all -m ping)
+8. Perform a dry run (ansible-playbook 00_master.yml --ask-become-pass --check)
+9. Run the main playbook (ansible-playbook --ask-become-pass --ask-pass 00_master.yml)
+10. On Router / Gateway enable the DNS Forwarding - point at the Pihole address
+11. On PC (Fedora) set static IP and point DNS at Pihole
