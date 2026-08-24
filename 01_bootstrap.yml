@@ -1,0 +1,198 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+    - name: update apt index and upgrade
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+        purge: true
+
+    - name: set a hostname
+      ansible.builtin.hostname:
+        name: __homeserver__.local.net
+        use: systemd
+
+    - name: restore the Hosts file
+      ansible.builtin.template:
+        src: hosts.j2
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: set timezone
+      community.general.timezone:
+        name: "Europe/London"
+
+    - name: set locale
+      community.general.locale_gen:
+        name: en_GB.UTF-8
+        state: present
+
+    - name: install essentials
+      ansible.builtin.apt:
+        name:
+          - htop
+          - vim
+          - git
+          - curl
+          - python3
+          - raspi-config
+          - rsync
+          - ufw
+          - dnsutils
+          - lshw
+          - tree
+        state: present
+
+    - name: Create log directory for persistent journald logs
+      ansible.builtin.file:
+        path: /var/log/journal
+        state: directory
+
+    - name: Ensure journald saves the logs as persistent
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/journald.conf
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      loop:
+        - { regexp: "^#?Storage=", line: "Storage=persistent" }
+        - { regexp: "^#?Compress=", line: "Compress=yes" }
+        - { regexp: "^#?SystemMaxUse=", line: "SystemMaxUse=500M" }
+        - { regexp: "^#?SystemKeepFree=", line: "SystemKeepFree=1G" }
+      notify: Restart systemd-journald
+
+    - name: create a user __username__
+      ansible.builtin.user:
+        name: __username__
+        groups: sudo
+        append: true
+        create_home: yes
+        shell: /bin/bash
+        state: present
+
+    - name: add SSH key to __username__ user
+      ansible.posix.authorized_key:
+        user: 
+        key: "ssh-rsa __SSH_KEY_FOR_PC__ username@pc.local.net"
+
+    - name: harden SSH
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{item.regexp}}"
+        line: "{{item.line}}"
+      loop:
+        - { regexp: "^#?PasswordAuthentication", line: "PasswordAuthentication no"}
+        - { regexp: "^#?PermitRootLogin", line: "PermitRootLogin no" }
+      notify: restart SSH service
+
+    - name: ensure OpenSSH is running and enabled
+      ansible.builtin.service:
+        name: ssh
+        state: started
+        enabled: yes
+
+    - name: change IP to Static on wifi interface wlan0
+      community.general.nmcli:
+        conn_name: "my.wifi"
+        ifname: wlan0
+        type: wifi
+        ssid: "__wifi_name__"
+        wifi_sec:
+          key-mgmt: wpa-psk
+          psk: "__password__"
+        method4: manual
+        ip4: __x.x.x.x__
+        gw4: __x.x.x.x__
+        dns4: __x.x.x.x__
+        dns4_ignore_auto: true
+        state: present
+        autoconnect: true
+
+    - name: change IP to Static on LAN interface eth0
+      community.general.nmcli:
+        conn_name: "Wired connection 1"
+        ifname: eth0
+        type: ethernet
+        method4: manual
+        ip4: __x.x.x.x__
+        state: present
+
+    - name: set UFW default incoming policy to Deny
+      community.general.ufw:
+        direction: incoming
+        default: deny
+
+    - name: set UFW default outgoing policy to Allow
+      community.general.ufw:
+        direction: outgoing
+        default: allow
+
+    - name: enable UFW logging
+      community.general.ufw:
+        logging: "on"
+
+    - name: add rule to allow any type of connection from PC via direct LAN link
+      community.general.ufw:
+        rule: allow
+        from_ip: __x.x.x.x__
+
+    - name: add rule to allow any type of connection from PC via Wifi
+      community.general.ufw:
+        rule: allow
+        from_ip: __x.x.x.x__
+
+    - name: add rule to allow 443 and 80 ports from my phone
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+        from_ip: __x.x.x.x__
+      loop:
+        - 443
+        - 80
+
+    - name: add rule to allow 443 and 80 ports from the laptop
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+        from_ip: __x.x.x.x__
+      loop:
+        - 443
+        - 80
+
+    - name: add rule to allow 443 and 80 ports from second PC
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+        from_ip: __x.x.x.x__
+      loop:
+        - 443
+        - 80
+
+    - name: activate the UFW
+      community.general.ufw:
+        state: enabled
+
+    - name: ensure that UFW Service is enabled and running
+      ansible.builtin.service:
+        name: ufw
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart SSH service
+      ansible.builtin.service:
+        name: ssh
+        state: restarted
+
+    - name: Restart systemd-journald
+      ansible.builtin.systemd:
+        name: systemd-journald
+        state: restarted
