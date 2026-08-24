@@ -98,7 +98,7 @@
 
     - name: change IP to Static on wifi interface wlan0
       community.general.nmcli:
-        conn_name: "my.wifi"
+        conn_name: "__wifiname__"
         ifname: wlan0
         type: wifi
         ssid: "__wifi_name__"
