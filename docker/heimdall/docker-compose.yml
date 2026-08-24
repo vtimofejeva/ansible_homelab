@@ -1,0 +1,21 @@
+services:
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    networks:
+      - homenet
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - ALLOW_INTERNAL_REQUESTS=false #optional
+    volumes:
+      - ./config:/config
+    ports:
+      - xxxx:xx
+      - xxxx:xx
+    restart: unless-stopped
+
+networks:
+  homenet:
+    external: true
