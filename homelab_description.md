@@ -1,5 +1,5 @@
 # Homelab - General Description
-Homelab is currently in progress and has not reached its potential even with the current hardware. There are many projects ahead to improve redundancy and extend functionality.
+Homelab is currently in progress and operational. There are many projects ahead to improve redundancy and extend functionality. Certain hardware limitations addressed below in the Improvements section.
 
 Purpose: 
 - To provide a secure local-only services for my family. This currently include data (docs and photos) shared storage and backups, as well as, sync notes application.
@@ -70,6 +70,6 @@ Projects for the current hardware:
 6. Add CCTV software (currently I have only one CCTV camera though).
 
 New hardware projects:
-1. Replace the ISP router and purchase a switch - setup VLANs and Static DNS via DHCP (current limitation forces to setup static DNS addresses directly on the hosts).
+1. Replace the ISP router and purchase a switch - setup VLANs for network segmentation, add Static DNS via DHCP (current limitation forces to setup static DNS addresses directly on the hosts).
 2. Purchase more storage - setup RAID mirroring at least. Perhaps NAS.
 3. Expand CCTV cameras and put them on a separate VLAN.
