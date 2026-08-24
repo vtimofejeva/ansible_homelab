@@ -1,0 +1,15 @@
+#add this file to /etc/systemd/system + it must have the a Timer unit with the same name in the same dir
+#also don't forget the script itself, which is found in ExecStart specified location
+
+[Unit]
+Description=Run a daily backup
+#add below if backups are between two different hosts on the network
+#After=network-online.target
+#Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/docs_script.sh
+
+[Install]
+WantedBy=timers.target
