@@ -1,0 +1,2 @@
+[homelab]
+__x.x.x.x__ ansible_user=__username__ ansible_ssh_private_key_file=~/.ssh/__sshkeyname__
