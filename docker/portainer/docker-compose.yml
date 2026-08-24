@@ -1,0 +1,17 @@
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:lts
+    networks:
+      - homenet
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/data
+    ports:
+      - xxxx:xx
+#     - xxxx:xx  # Remove if you do not intend to use Edge Agents
+
+networks:
+  homenet:
+    external: true
