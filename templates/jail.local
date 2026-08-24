@@ -1,9 +1,0 @@
-[DEFAULT]
-ignoreip = 127.0.0.1/8 ::1 __x.x.x.x__
-bantime = 15m
-findtime = 5m
-maxretry = 3
-backend = systemd
-
-[sshd]
-enabled = true
