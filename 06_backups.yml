@@ -1,0 +1,74 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+    - name: Create directories on MicroSD to Copy data from HDD
+      ansible.builtin.file:
+        path: "/home/__username__/{{ item }}"
+        state: directory
+      loop:
+        - backups/
+        - backups/documents
+        - backups/documents/vtimofejeva
+
+    - name: Copy Homelab data from HDD to MicroSD to have a backup
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/homelab/ /home/__username__/backups/
+
+    - name: Copy Documents data from HDD to MicroSD to have a backup
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/storage/documents/vtimofejeva/ /home/__username__/backups/documents/vtimofejeva/
+
+    - name: Documents Backup script - copy to the exec location
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/homelab/configs/documents_b_config/docs_backup.sh_backup /usr/local/bin/docs_backup.sh
+
+    - name: Change file ownership, group and permissions of the Backup script
+      ansible.builtin.file:
+        path: /usr/local/bin/docs_backup.sh
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Documents Backup script - copy the Service Unit file
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/homelab/configs/documents_b_config/docs_backup.service_backup /etc/systemd/system/docs_backup.service
+
+    - name: Documents Backup script - copy the Service Unit file
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/homelab/configs/documents_b_config/docs_backup.timer_backup /etc/systemd/system/docs_backup.timer
+
+    - name: Docker Containers Backup script - copy to the exec location
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/homelab/configs/docker_backup_config/docker_backup.sh_backup /usr/local/bin/docker_backup.sh
+
+    - name: Change file ownership, group and permissions of the Backup script
+      ansible.builtin.file:
+        path: /usr/local/bin/docker_backup.sh
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Documents Backup script - copy the Service Unit file
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/homelab/configs/docker_backup_config/docker_backup.service_backup /etc/systemd/system/docker_backup.service
+
+    - name: Documents Backup script - copy the Service Unit file
+      ansible.builtin.command:
+        cmd: rsync -a /media/external_drive/homelab/configs/docker_backup_config/docker_backup.timer_backup /etc/systemd/system/docker_backup.timer
+
+    - name: Let systemd know about the new unit files (= daemon reload)
+      ansible.builtin.systemd_service:
+        daemon-reload: true
+
+    - name: Enable the Timers unit of docs_backup
+      ansible.builtin.systemd_service:
+        name: docs_backup.timer
+        enabled: true
+
+    - name: Enable the Timers unit of docker_backup
+      ansible.builtin.systemd_service:
+        name: docker_backup.timer
+        enabled: true
