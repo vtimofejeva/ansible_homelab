@@ -1,0 +1,13 @@
+#file to store in /etc/systemd/system/
+#requires a Service unit with the same name to run the backup shell script
+#backup script is located in /usr/local/bin/ so it is recognised by $PATH and can be executed
+
+[Unit]
+Description=Daily rsync backups timer for docs_unit.service
+
+[Timer]
+OnCalendar=02:00
+Persistent=True
+
+[Install]
+WantedBy=timers.target
