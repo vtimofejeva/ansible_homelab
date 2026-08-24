@@ -7,22 +7,35 @@ Note: the full non-redacted repos are stored privately.
 - ansible/                = disaster recovery and server provisioning
 - docker/                 = container configurations and documentation
 - backups_scripts/        = automated backup scripts and systemd timers
-- homealb_description.md  = detailed infrastructure documentation
+- homelab_description.md  = detailed infrastructure documentation
 - homelab_diagram         = network / infrastructure diagram
 
 # Skills
 - Linux administration
-- Ansible / Infrastructure as Code
-- Docker & Docker Compose
-- SSH / public-key authentication / Fail2ban
+  I am using Fedora as my main PC, whilst Pi server is running on a Trixie OS (Debian).
+- Infrastructure as Code
+  Created Ansible playbooks and fully tested them by re-imaging and provisioning my Pi Server from scartch.
+- Docker
+  Using containers to run various services on Pi Server. Docker-compose files and .env used for initializing the containers, whilst volumes stored on external HDD.
+- SSH and Fail2ban
+  Hardened SSH security on both Linux devices, restricting access only to one single PC via SSH keys.
 - Network configuration
+  Adjusted the DHCP Reservation on the ISP router. Set static IPs and specifically DNS Server to ensure Local DNS via Pi-hole is working correctly with NPM.
 - DNS / Pi-hole
+  Due to the limitation of the ISP router (only DNS Forwarding is available), Local DNS requires static IP addressing on the end hosts.
 - HTTPS / PKI
+  Ngnix Proxy Manager is used to ensure secure SSL connection to the local services runnning via Docker. I created CA, Intermediate CA and SSL certificates accordingly.
 - UFW (on Trixie OS) / Firewalld (on Fedora)
+  Firewall configuration on the hosts.
 - Backup automation
+  Scheduled backups scripts ensure that both documents and docker volumes are backed up nightly using the systemd units.
 - Disaster recovery
+  In addition to the fully tested Ansible and Scheduled Backups, I have an offline SSD that is also used as a backup storage.
 - Monitoring / alerting
+  Whilst Uptime Kuma is used for containers' health monitoring, Healthcheck.io is used to monitor both Pi Server uptime and Backup scripts.
+  Alerts are sent via email to my inbox.
 - Git
+  Repositories are stored on the Pi Server and pushed to Github's private repos.
 
 # Networking Concepts Addressed
 - IPv4 addressing
