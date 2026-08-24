@@ -62,19 +62,21 @@ Directory: homelab/ansible/
                                       jail.local.j2
 
 # External Storage Structure (HDD and SSD)
- /media/external_drive/
-                       storage/
-                              documents/
-                                        vtimofejeva/
-                                        cdoyle/
-                              photos/
-                        homelab/
-                              ansible/
-                              ssh_keys/
-                              configs/
-                              selfsigned_certs/
-                              docker/
-                                        containers/
+ /media/external_drive
+│
+├── storage
+│   ├── documents
+│   │   ├── vtimofejeva
+│   │   └── cdoyle
+│   └── photos
+│
+└── homelab
+    ├── ansible
+    ├── ssh_keys
+    ├── configs
+    ├── selfsigned_certs
+    └── docker
+        ├── containers
 
 # Steps Required Before Running Ansible Playbook
 1. On Router / Gateway disable the DNS Forwarding - set back to Automatic
